@@ -1,0 +1,22 @@
+========================================================================
+EXPERIMENT NO 5: REST API TO SERVE A MACHINE LEARNING MODEL
+Domain: Air Quality Index (AQI) Prediction REST API (from Experiment 4)
+Framework: FastAPI + Uvicorn + Scikit-Learn
+========================================================================
+
+Step 1: Install Dependencies
+   pip install -r requirements.txt
+
+Step 2: Train & Save the Machine Learning Model
+   python train_model.py
+
+Step 3: Launch the REST API Server
+   uvicorn app:app --reload --port 8000
+
+Step 4: Interactive Swagger UI
+   http://127.0.0.1:8000/docs
+
+Step 5: Run Automated Tests
+   python test_api.py
+========================================================================
+

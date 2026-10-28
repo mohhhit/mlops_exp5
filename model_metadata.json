@@ -1,0 +1,24 @@
+{
+    "model_name": "Air Quality Index (AQI) Predictor",
+    "algorithm": "RandomForestRegressor",
+    "version": "1.0.0",
+    "experiment": "Experiment 5 - REST API for ML Model",
+    "features": [
+        "pm10",
+        "pm2_5",
+        "carbon_monoxide",
+        "nitrogen_dioxide",
+        "sulphur_dioxide",
+        "ozone"
+    ],
+    "target": "us_aqi",
+    "dataset_records": 288,
+    "train_records": 230,
+    "test_records": 58,
+    "metrics": {
+        "train_r2": 0.9703,
+        "test_r2": 0.7838,
+        "test_mae": 16.031,
+        "test_rmse": 20.9604
+    }
+}

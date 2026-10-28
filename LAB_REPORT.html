@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MLOps Lab Report - Experiment 5</title>
+  <style>
+    @media print {
+      body { font-size: 11pt; }
+      .no-print { display: none; }
+      .page-break { page-break-before: always; }
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #24292e;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: #ffffff;
+    }
+    .header-box {
+      border-bottom: 3px solid #0366d6;
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+    }
+    h1 {
+      color: #0366d6;
+      font-size: 24pt;
+      margin-bottom: 5px;
+    }
+    h2 {
+      color: #24292e;
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 8px;
+      margin-top: 30px;
+      font-size: 16pt;
+    }
+    h3 {
+      color: #0366d6;
+      font-size: 13pt;
+      margin-top: 20px;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background: #f6f8fa;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .meta-table td {
+      padding: 10px 15px;
+      border: 1px solid #e1e4e8;
+      font-size: 10.5pt;
+    }
+    .meta-table td strong {
+      color: #24292e;
+    }
+    pre {
+      background: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 10pt;
+      line-height: 1.45;
+    }
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: #f0f3f6;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 9.5pt;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    table.data-table th, table.data-table td {
+      border: 1px solid #dfe2e5;
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 10pt;
+    }
+    table.data-table th {
+      background-color: #f6f8fa;
+      font-weight: 600;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 9pt;
+      font-weight: 600;
+      border-radius: 12px;
+      background: #e1f5fe;
+      color: #0277bd;
+    }
+    .screenshot-placeholder {
+      border: 2px dashed #90caf9;
+      background: #fbfdff;
+      border-radius: 8px;
+      padding: 25px;
+      text-align: center;
+      color: #1565c0;
+      margin: 15px 0 25px 0;
+      font-weight: 500;
+    }
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 18px;
+      background: #0366d6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 11pt;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .print-button:hover {
+      background: #024ea4;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-button no-print" onclick="window.print()">🖨️ Save as PDF</button>
+
+  <div class="header-box">
+    <h1>EXPERIMENT NO. 05: REST API FOR ML MODEL</h1>
+    <p style="margin: 0; color: #586069; font-size: 12pt;">Department of Computer Engineering / Information Technology &bull; Machine Learning Operations (MLOps)</p>
+  </div>
+
+  <table class="meta-table">
+    <tr>
+      <td><strong>Subject:</strong> Machine Learning Operations (MLOps)</td>
+      <td><strong>Experiment No:</strong> 05</td>
+    </tr>
+    <tr>
+      <td><strong>Student Name:</strong> [Your Name]</td>
+      <td><strong>Roll No / PRN:</strong> [Your Roll No]</td>
+    </tr>
+    <tr>
+      <td><strong>Faculty In-Charge:</strong> Prof. Swapnil Pawar</td>
+      <td><strong>Date of Submission:</strong> October 2026</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Problem Statement:</strong> Air Quality Index (AQI) Prediction REST API (Derived from Experiment 4)</td>
+    </tr>
+  </table>
+
+  <h2>1. AIM & OBJECTIVES</h2>
+  <p><strong>Aim:</strong> To design, build, test, and deploy a production-grade REST API using FastAPI that serves a Machine Learning model trained on the atmospheric pollutant dataset from Experiment 04.</p>
+  <p><strong>Objectives:</strong></p>
+  <ul>
+    <li>Integrate the preprocessed and feature-engineered Air Quality dataset from Experiment 04.</li>
+    <li>Train a <code>RandomForestRegressor</code> model predicting continuous US AQI and EPA air quality classifications.</li>
+    <li>Serialize and manage versioned model artifacts (<code>aqi_model.pkl</code> and <code>model_metadata.json</code>).</li>
+    <li>Implement production REST endpoints (<code>GET /</code>, <code>GET /health</code>, <code>GET /model-info</code>, <code>POST /predict</code>, <code>POST /predict-batch</code>).</li>
+    <li>Enforce schema integrity and boundary validation using Pydantic models.</li>
+    <li>Provide automatic OpenAPI 3.0 documentation via interactive Swagger UI (<code>/docs</code>).</li>
+    <li>Validate service performance and prediction fidelity with automated testing suites.</li>
+  </ul>
+
+  <h2>2. SOFTWARE & ENVIRONMENT SPECIFICATIONS</h2>
+  <ul>
+    <li><strong>Runtime:</strong> Python 3.11.9</li>
+    <li><strong>Web Framework:</strong> FastAPI 0.104.1</li>
+    <li><strong>ASGI Web Server:</strong> Uvicorn 0.24.0</li>
+    <li><strong>Machine Learning:</strong> Scikit-Learn 1.7.2</li>
+    <li><strong>Data Manipulation:</strong> Pandas 2.2.x, NumPy 1.26.x</li>
+    <li><strong>Validation & Documentation:</strong> Pydantic v2, Swagger UI / OpenAPI 3.0</li>
+  </ul>
+
+  <h2>3. SYSTEM ARCHITECTURE & DATA FLOW</h2>
+  <pre>
+┌─────────────────────────────────────────────────────────────┐
+│             Experiment 04 Feature Pipeline                  │
+│       (data/air_quality_data.csv: 288 hourly records)       │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STAGE 1: Model Training & Serialization (train_model.py)   │
+│  - Features: PM10, PM2.5, CO, NO2, SO2, O3                  │
+│  - Target: us_aqi (Numeric US Air Quality Index)            │
+│  - Split: 80% Train (230 records) / 20% Test (58 records)   │
+│  - Model: RandomForestRegressor(n_estimators=100)           │
+│  - Outputs: aqi_model.pkl, model_metadata.json              │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STAGE 2: REST API Deployment with ASGI Server (app.py)     │
+│  - Framework: FastAPI + Uvicorn                             │
+│  - Endpoints:                                               │
+│    * GET  /              -> API status & available routes   │
+│    * GET  /health        -> Health check & liveliness probe │
+│    * GET  /model-info    -> Model metrics & hyperparameters │
+│    * POST /predict       -> Real-time AQI prediction        │
+│    * POST /predict-batch -> High-throughput batch inference│
+│    * GET  /docs          -> Interactive Swagger UI          │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STAGE 3: Client Verification & Validation (test_api.py)    │
+│  - Automated request testing across multiple scenarios     │
+│  - Validates HTTP 200 responses and prediction consistency  │
+└─────────────────────────────────────────────────────────────┘
+  </pre>
+
+  <h2>4. MODEL TRAINING & EVALUATION</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+        <th>Interpretation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Dataset Records</strong></td>
+        <td>288 records</td>
+        <td>Atmospheric pollutant records from Mumbai (v1)</td>
+      </tr>
+      <tr>
+        <td><strong>Train / Test Split</strong></td>
+        <td>80% / 20% (230 train / 58 test)</td>
+        <td>Stratified random split</td>
+      </tr>
+      <tr>
+        <td><strong>Train R² Score</strong></td>
+        <td>0.9703</td>
+        <td>High goodness-of-fit on training subset</td>
+      </tr>
+      <tr>
+        <td><strong>Test R² Score</strong></td>
+        <td><strong>0.7838</strong></td>
+        <td>Strong generalization to unseen atmospheric samples</td>
+      </tr>
+      <tr>
+        <td><strong>Mean Absolute Error (MAE)</strong></td>
+        <td>16.03</td>
+        <td>Average absolute error of ~16 AQI units</td>
+      </tr>
+      <tr>
+        <td><strong>Root Mean Squared Error (RMSE)</strong></td>
+        <td>20.96</td>
+        <td>Penalizes rare large forecasting errors</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Command & Terminal Output:</h3>
+  <pre>
+$ python train_model.py
+Loading Air Quality dataset from: data\air_quality_data.csv
+Total dataset records: 288
+Features: ['pm10', 'pm2_5', 'carbon_monoxide', 'nitrogen_dioxide', 'sulphur_dioxide', 'ozone']
+Target: us_aqi
+
+--- Model Evaluation ---
+Train R² Score : 0.9703
+Test R² Score  : 0.7838
+Test MAE       : 16.0310
+Test RMSE      : 20.9604
+
+Trained model successfully saved to 'aqi_model.pkl'
+Model metadata successfully saved to 'model_metadata.json'
+  </pre>
+
+  <div class="page-break"></div>
+
+  <h2>5. REST API ENDPOINTS & SCHEMAS</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Endpoint</th>
+        <th>Description</th>
+        <th>Expected Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge">GET</span></td>
+        <td><code>/</code></td>
+        <td>Root metadata, API version, and route manifest</td>
+        <td>200 OK</td>
+      </tr>
+      <tr>
+        <td><span class="badge">GET</span></td>
+        <td><code>/health</code></td>
+        <td>Liveliness probe for container orchestration</td>
+        <td>200 OK</td>
+      </tr>
+      <tr>
+        <td><span class="badge">GET</span></td>
+        <td><code>/model-info</code></td>
+        <td>Model metadata, feature dependencies, and test scores</td>
+        <td>200 OK</td>
+      </tr>
+      <tr>
+        <td><span class="badge" style="background:#e8f5e9; color:#2e7d32;">POST</span></td>
+        <td><code>/predict</code></td>
+        <td>Real-time single observation inference</td>
+        <td>200 OK</td>
+      </tr>
+      <tr>
+        <td><span class="badge" style="background:#e8f5e9; color:#2e7d32;">POST</span></td>
+        <td><code>/predict-batch</code></td>
+        <td>High-throughput batch inference</td>
+        <td>200 OK</td>
+      </tr>
+      <tr>
+        <td><span class="badge">GET</span></td>
+        <td><code>/docs</code></td>
+        <td>Interactive OpenAPI / Swagger UI interface</td>
+        <td>200 OK</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Sample Request Payload (POST /predict):</h3>
+  <pre>
+{
+  "pm10": 85.0,
+  "pm2_5": 72.5,
+  "carbon_monoxide": 340.0,
+  "nitrogen_dioxide": 24.5,
+  "sulphur_dioxide": 8.2,
+  "ozone": 35.0
+}
+  </pre>
+
+  <h3>Sample Response Payload:</h3>
+  <pre>
+{
+  "predicted_aqi": 188.41,
+  "aqi_category": "Unhealthy",
+  "health_advisory": "Everyone may begin to experience health effects; sensitive groups may experience more serious effects.",
+  "dominant_pollutant": "PM2.5",
+  "input_features": {
+    "pm10": 85.0,
+    "pm2_5": 72.5,
+    "carbon_monoxide": 340.0,
+    "nitrogen_dioxide": 24.5,
+    "sulphur_dioxide": 8.2,
+    "ozone": 35.0
+  }
+}
+  </pre>
+
+  <h2>6. EXPERIMENTAL RESULTS & SCREENSHOTS</h2>
+
+  <h3>Screenshot 1: Model Training Execution</h3>
+  <p><em>Demonstrating model fitting, validation metrics, and file persistence.</em></p>
+  <div class="screenshot-placeholder">
+    [ Screenshot 1: Terminal output of <code>python train_model.py</code> ]
+  </div>
+
+  <h3>Screenshot 2: REST API Server Startup</h3>
+  <p><em>Demonstrating ASGI Uvicorn server running at <code>http://127.0.0.1:8000</code>.</em></p>
+  <div class="screenshot-placeholder">
+    [ Screenshot 2: Terminal running <code>uvicorn app:app --reload --port 8000</code> ]
+  </div>
+
+  <h3>Screenshot 3: Interactive Swagger UI Documentation</h3>
+  <p><em>Auto-generated OpenAPI documentation accessible at <code>http://127.0.0.1:8000/docs</code>.</em></p>
+  <div class="screenshot-placeholder">
+    [ Screenshot 3: Browser view of Swagger UI (<code>/docs</code>) showing all endpoints ]
+  </div>
+
+  <h3>Screenshot 4: Live Prediction Execution (/predict)</h3>
+  <p><em>Interactive test with 200 OK response, predicted AQI, category, and health advisory.</em></p>
+  <div class="screenshot-placeholder">
+    [ Screenshot 4: Swagger UI showing POST /predict request body & response body ]
+  </div>
+
+  <h3>Screenshot 5: Automated Verification Test Run</h3>
+  <p><em>Client verification suite confirming live HTTP responses across test scenarios.</em></p>
+  <div class="screenshot-placeholder">
+    [ Screenshot 5: Terminal output of <code>python test_api.py</code> ]
+  </div>
+
+  <h2>7. CONCLUSION & MLOps LEARNING OUTCOMES</h2>
+  <ol>
+    <li><strong>Decoupled Model Architecture:</strong> Decoupled model training (<code>train_model.py</code>) from online serving (<code>app.py</code>), adhering to core MLOps separation of concerns.</li>
+    <li><strong>Contract & Schema Validation:</strong> Leveraged Pydantic data schemas to ensure type safety, automatic error handling, and structured request bodies.</li>
+    <li><strong>Production Liveliness Probes:</strong> Implemented <code>/health</code> and <code>/model-info</code> monitoring endpoints to facilitate integration with Docker, Kubernetes, and API gateways.</li>
+    <li><strong>Domain Integration:</strong> Successfully applied the atmospheric dataset from Experiment 04, delivering actionable public health advisories alongside numerical regression outputs.</li>
+  </ol>
+
+</body>
+</html>
+

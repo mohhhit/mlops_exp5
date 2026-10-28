@@ -1,0 +1,72 @@
+========================================================================
+EXPERIMENT NO 5: REST API TO SERVE A MACHINE LEARNING MODEL
+Domain: Air Quality Index (AQI) Prediction REST API (from Experiment 4)
+Framework: FastAPI + Uvicorn + Scikit-Learn
+========================================================================
+
+1. PROBLEM STATEMENT OVERVIEW
+-----------------------------
+Develop and deploy a high-performance REST API to serve a machine learning
+model trained on the atmospheric pollutant dataset from Experiment 4:
+- Target: US Air Quality Index (us_aqi) & EPA Air Quality Category
+- Input Features:
+  * PM10 (Coarse Particulate Matter, µg/m³)
+  * PM2.5 (Fine Particulate Matter, µg/m³)
+  * Carbon Monoxide (CO, µg/m³)
+  * Nitrogen Dioxide (NO2, µg/m³)
+  * Sulphur Dioxide (SO2, µg/m³)
+  * Ozone (O3, µg/m³)
+
+2. ARCHITECTURE & COMPONENTS
+-----------------------------
+1. data/
+   - air_quality_data.csv: Full preprocessed atmospheric dataset (from Exp 4).
+   - train_data.csv / test_data.csv: Train and test dataset splits.
+
+2. train_model.py:
+   - Loads the atmospheric pollutant dataset.
+   - Splits data into 80% train and 20% test sets.
+   - Trains a RandomForestRegressor model (Test R²: ~0.78, MAE: ~16.03).
+   - Serializes trained model into 'aqi_model.pkl'.
+   - Generates 'model_metadata.json' tracking model evaluation metrics.
+
+3. app.py (FastAPI Application):
+   - Implements production-grade endpoints:
+     * GET  /              : Root metadata, status, and API routes.
+     * GET  /health        : Health check / liveliness probe.
+     * GET  /model-info    : Model architecture, features, and metrics.
+     * POST /predict       : Real-time inference returning AQI score, EPA category,
+                             and health advisory.
+     * POST /predict-batch : Batch inference processing for multiple sensor logs.
+     * GET  /docs          : Interactive Swagger UI OpenAPI documentation.
+     * GET  /redoc         : ReDoc alternative API documentation.
+
+4. test_api.py:
+   - Automated client test script.
+   - Tests both live HTTP server and local offline endpoint execution.
+   - Validates multiple air quality scenarios (Clean/Rural, Moderate, Severe).
+
+3. HOW TO RUN EXPERIMENT 5
+---------------------------
+Step 1: Install Dependencies
+   pip install -r requirements.txt
+
+Step 2: Train & Save the Machine Learning Model
+   python train_model.py
+   (Generates 'aqi_model.pkl' and 'model_metadata.json')
+
+Step 3: Launch the REST API Server
+   uvicorn app:app --reload --port 8000
+   - Server will be available at: http://127.0.0.1:8000
+   - Interactive Swagger UI:     http://127.0.0.1:8000/docs
+   - Alternative ReDoc UI:       http://127.0.0.1:8000/redoc
+
+Step 4: Test the REST API (in a second terminal)
+   python test_api.py
+
+Step 5 (Optional): Test via cURL
+   curl -X POST "http://127.0.0.1:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d "{\"pm10\": 85.0, \"pm2_5\": 72.5, \"carbon_monoxide\": 340.0, \"nitrogen_dioxide\": 24.5, \"sulphur_dioxide\": 8.2, \"ozone\": 35.0}"
+========================================================================
+
